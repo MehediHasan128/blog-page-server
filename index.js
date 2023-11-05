@@ -29,6 +29,17 @@ async function run() {
 
     const blogCollection = client.db('blogPage').collection('blogs')
 
+
+    app.get('/allBlogs', async(req, res) =>{
+      const result = await blogCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/recentBlogs', async(req, res) =>{
+      const result = await blogCollection.find().sort({time: -1}).toArray();
+      res.send(result);
+    })
+
     app.post('/blog', async(req, res) =>{
       const blog = req.body;
       const result = await blogCollection.insertOne(blog);
