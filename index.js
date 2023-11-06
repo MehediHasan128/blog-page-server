@@ -3,7 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 app.use(cors());
@@ -29,6 +29,7 @@ async function run() {
 
     const blogCollection = client.db('blogPage').collection('blogs');
     const wishListCollection = client.db('blogPage').collection('wishLists')
+    const commentCollection = client.db('blogPage').collection('comments')
 
 
     app.get('/allBlogs', async(req, res) =>{
@@ -50,6 +51,13 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/blogs/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await blogCollection.findOne(query);
+      res.send(result);
+    })
+
     app.post('/blog', async(req, res) =>{
       const blog = req.body;
       const result = await blogCollection.insertOne(blog);
@@ -59,6 +67,20 @@ async function run() {
     app.post('/addWishList', async(req, res) =>{
       const blog = req.body;
       const result = await wishListCollection.insertOne(blog);
+      res.send(result)
+    })
+
+    app.post('/comments', async(req, res) =>{
+      const comment = req.body;
+      const result = await commentCollection.insertOne(comment);
+      res.send(result);
+    })
+
+
+    app.delete('/wishList/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await wishListCollection.deleteOne(query);
       res.send(result)
     })
 
