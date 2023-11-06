@@ -27,7 +27,8 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const blogCollection = client.db('blogPage').collection('blogs')
+    const blogCollection = client.db('blogPage').collection('blogs');
+    const wishListCollection = client.db('blogPage').collection('wishLists')
 
 
     app.get('/allBlogs', async(req, res) =>{
@@ -40,10 +41,25 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/wishLists', async(req, res) =>{
+      let query = {};
+      if(req.query?.email){
+        query = {userEmail: req.query.email}
+      }
+      const result = await wishListCollection.find(query).toArray();
+      res.send(result)
+    })
+
     app.post('/blog', async(req, res) =>{
       const blog = req.body;
       const result = await blogCollection.insertOne(blog);
       res.send(result);
+    })
+
+    app.post('/addWishList', async(req, res) =>{
+      const blog = req.body;
+      const result = await wishListCollection.insertOne(blog);
+      res.send(result)
     })
 
     // Send a ping to confirm a successful connection
