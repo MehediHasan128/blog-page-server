@@ -30,7 +30,6 @@ const client = new MongoClient(uri, {
 
 const verifyToken = async(req, res, next) =>{
   const token = req?.cookies?.token;
-  console.log('token in mid', token);
   if(!token){
     return res.status(401).send({message: 'unauthorized access'})
   }
@@ -80,11 +79,18 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/allBlogs/:title', async(req, res) =>{
+    app.get('/searchBlog/:title', async(req, res) =>{
       const blogTitle = req.params.title;
       const query = {title: blogTitle}
       const result = await blogCollection.findOne(query)
       res.send(result)
+    })
+
+    app.get('/filterBlogs/:category', async(req, res) =>{
+      const filterValue = req.params.category;
+      const query = {category: filterValue};
+      const result = await blogCollection.find(query).toArray();
+      res.send(result);
     })
 
     app.get('/recentBlogs', async(req, res) =>{
@@ -120,6 +126,16 @@ async function run() {
 
     app.get('/updateBlog/:id', async(req, res) =>{
       const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await blogCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.get('/getWishListBlog/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {blogId: id};
+      const result = await wishListCollection.findOne(query)
+      res.send(result)
     })
 
     app.post('/blog', async(req, res) =>{
@@ -138,6 +154,26 @@ async function run() {
       const comment = req.body;
       const result = await commentCollection.insertOne(comment);
       res.send(result);
+    })
+
+
+    app.put('/update/:id', async(req, res) =>{
+      const id = req.params.id;
+      console.log(id);
+      const query = {_id: new ObjectId(id)};
+      const option = { upsert: true }
+      const updateBlog = req.body;
+      const blog = {
+        $set: {
+          title: updateBlog.updateTitel,
+          image: updateBlog.updatePhotoUrl,
+          category: updateBlog.updateCategory,
+          shortDescription: updateBlog.updateShortDescription,
+          longDescription: updateBlog.updateLongDescription,
+        }
+      }
+      const result = await blogCollection.updateOne(query, blog, option);
+      res.send(result)
     })
 
 
