@@ -9,7 +9,10 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 app.use(cors({
-  origin: ['http://localhost:5173'],
+  origin: [
+    'https://blog-page-8238c.web.app',
+    'https://blog-page-8238c.firebaseapp.com'
+  ],
   credentials: true
 }));
 app.use(express.json());
@@ -55,8 +58,7 @@ async function run() {
       res
       .cookie('token', token, {
         httpOnly: true,
-        secure: true,
-        sameSite: false
+        secure: true
       })
       .send({success: true})
     })
@@ -94,14 +96,11 @@ async function run() {
     })
 
     app.get('/recentBlogs', async(req, res) =>{
-      const result = await blogCollection.find().sort({time: -1}).toArray();
+      const result = await blogCollection.find().sort({time: -1}, {date: -1}).toArray();
       res.send(result);
     })
 
-    app.get('/wishLists', verifyToken, async(req, res) =>{
-      if(req.user.email !== req.query.email){
-        return res.status(403).send({message: 'forbidden access'})
-      }
+    app.get('/wishLists', async(req, res) =>{
       let query = {};
       if(req.query?.email){
         query = {userEmail: req.query.email}
@@ -128,6 +127,12 @@ async function run() {
       const id = req.params.id;
       const query = {_id: new ObjectId(id)}
       const result = await blogCollection.findOne(query);
+      res.send(result);
+    })
+
+
+    app.get('/featured', async(req, res) =>{
+      const result = await blogCollection.find().toArray();
       res.send(result);
     })
 
