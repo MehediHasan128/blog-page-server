@@ -52,7 +52,6 @@ async function run() {
 
     app.post('/jwt', async(req, res) =>{
       const user = req.body;
-      console.log('token', user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'})
       res
       .cookie('token', token, {
@@ -79,6 +78,13 @@ async function run() {
     app.get('/allBlogs', async(req, res) =>{
       const result = await blogCollection.find().toArray();
       res.send(result);
+    })
+
+    app.get('/allBlogs/:title', async(req, res) =>{
+      const blogTitle = req.params.title;
+      const query = {title: blogTitle}
+      const result = await blogCollection.findOne(query)
+      res.send(result)
     })
 
     app.get('/recentBlogs', async(req, res) =>{
@@ -110,6 +116,10 @@ async function run() {
       const query = {_id: new ObjectId(id)}
       const result = await blogCollection.findOne(query);
       res.send(result);
+    })
+
+    app.get('/updateBlog/:id', async(req, res) =>{
+      const id = req.params.id;
     })
 
     app.post('/blog', async(req, res) =>{
